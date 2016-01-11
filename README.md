@@ -48,6 +48,22 @@ Starting a browsing party !
   end
 ```
 
+Because this will erase your scope (self will be the DSL), if you want to continue to have the current scope,
+you can instead use the parametered version of the DSL:
+
+```ruby
+  Otomo.session "http://myhost.tld" do |otomo|
+    document = otomo.get "/"
+
+    post_data = {}
+    document.css("form input").each do |input|
+      post_data[input["name"]] = input["value"]
+    end
+
+    otomo.post "/sign-in", post_data
+  end
+```
+
 ## Advantages over net/http
 
 - Transparent management of sessions and cookie

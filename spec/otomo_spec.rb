@@ -11,11 +11,24 @@ describe Otomo do
     expect(url_encoded).to eql "a[c]=1&a[d][]=1&a[d][]=2&a[d][]=3&b[]=1&b[]=2&b[]=3&c=test"
   end
 
+
   it 'can ask with query' do
     Otomo.session "http://www.google.com" do
-      
+
       doc = get "?gfe_rd=cr&ei=JtyTVu2WCOvC8Af6noyAAQ#q=test"
       puts doc.inspect
+    end
+  end
+
+  it 'return the net/http request in raw mode' do
+    _self = self
+
+    Otomo.session "http://www.google.com" do |otomo|
+      otomo.raw_mode!
+
+      x = otomo.get "/"
+
+      expect(x.class).to be(Net::HTTPOK)
     end
   end
 

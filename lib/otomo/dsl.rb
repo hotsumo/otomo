@@ -5,7 +5,13 @@ module Otomo
     def initialize otomo, &block
       @otomo = otomo
       otomo.connect
-      instance_eval(&block)
+      if block.parameters.count==0
+        instance_eval(&block)
+      elsif block.parameters.count==1
+        block.call(self)
+      else
+        raise ArgumentError, "The block should have zero or one parameter"
+      end
     end
 
     def debug_mode!
