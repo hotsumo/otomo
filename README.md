@@ -97,6 +97,32 @@ Remove a cookie manually
 
 Clear the session
 
+## Handling the MIME types
+
+You can create your own handler for each Content-Type you want.
+Currently there's handler for html, json, xml and a "text" default handler.
+
+Example with the HtmlHandler:
+
+```ruby
+  require 'nokogiri'
+  module Otomo
+    module Handlers
+      class HtmlHandler
+        def process resp
+          Nokogiri::HTML(resp.body)
+        end
+      end
+    end
+  end
+
+  Otomo::FormatHandlers["text/html"] = Otomo::Handlers::HtmlHandler.new
+```
+
+Feel free to create or overwrite the handlers !
+
+If you need more low level access to the answer of the server, you can use `raw_mode!` before any requests.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

@@ -8,9 +8,10 @@ module Otomo
 
     attr_accessor :cookies, :referer
 
-    attr_reader http
+    attr_reader :http
 
-    attr_accessor :raw_mode #Do not use response handlers at all.
+    def raw_mode=raw_mode; @raw_mode=raw_mode; end
+    def raw_mode?; @raw_mode; end
 
     attr_accessor :header
 
@@ -22,11 +23,8 @@ module Otomo
         uri = URI(path)
         @scheme = uri.scheme
         @host = uri.host
+        @port = uri.port
       end
-    end
-
-    def current_port
-      port || default_port
     end
 
     def use_ssl= x; @use_ssl = x; end
@@ -40,8 +38,8 @@ module Otomo
     end
 
     def connect
-      self.http = Net::HTTP.new(@host, current_port)
-      http.use_ssl = (@scheme == "https")
+      @http = Net::HTTP.new(@host, port)
+      @http.use_ssl = (@scheme == "https")
     end
 
     def full_path path
@@ -52,12 +50,30 @@ module Otomo
       end
     end
 
-    def get path
-      resp = if path =~ URI::regexp
-        http.get(URI(path).path, prepare_headers)
-      else
-        http.get(File.join("/", path), prepare_headers)
-      end
+    def html_document string
+      Nokogiri::HTML(string)
+    end
+
+    def put path, data={}
+      request "PUT", path, data
+    end
+
+    def patch path, data={}
+      request "PATCH", path, data
+    end
+
+    def get path, data={}
+      path, query = get_query_path path
+      request "GET", path + query_encoded_data(data, query),nil
+    end
+
+    def delete path, data={}
+      path, query = get_query_path path
+      request "PATH", path + query_encoded_data(data, query), nil
+    end
+
+    def request method, path, data={}
+      resp = http.send_request(method, path, data, prepare_headers)
 
       handle_response resp do
         set_cookies resp.get_fields('set-cookie')
@@ -65,11 +81,8 @@ module Otomo
       end
     end
 
-    def html_document string
-      Nokogiri::HTML(string)
-    end
 
-    def post path, data
+    def post path, data={}
       if data.is_a?(Hash)
         data = Otomo.hash_to_www_url_encoded(data)
       end
@@ -84,75 +97,82 @@ module Otomo
       end
     end
 
-  def add_cookie key, value
-    @cookies ||= {}
-    @cookies[key] = value
-  end
+    def add_cookie key, value
+      @cookies ||= {}
+      @cookies[key] = value
+    end
 
-  def remove_cookie c
-    @cookies.delete(c)
-  end
+    def remove_cookie c
+      @cookies.delete(c)
+    end
 
-  def clear_cookies
-    @cookies = {}
-  end
+    def clear_cookies
+      @cookies = {}
+    end
 
 private
 
-  def set_cookies from_array
-    if from_array!=nil
-      @cookies = Hash[ from_array.map{|elm| (elm.split("; ")[0].split("="))  }]
-    end
-  end
-
-  def get_cookies
-    if @cookies
-      @cookies.map{|k,v| "#{k}=#{v}"}.join("; ")
-    else
-      nil
-    end
-  end
-
-  def prepare_headers
-    @header.merge({
-      'Cookie' => get_cookies,
-      'Referer' => referer
-    }).reject{ |k,v| v.nil? || v.empty? }
-  end
-
-  def handle_response resp
-    case resp
-    when Net::HTTPOK
-      yield if block_given?
-
-      format_for resp
-    when Net::HTTPMovedPermanently, Net::HTTPMovedTemporarily, Net::HTTPFound
-      yield if block_given?
-      get resp.response["Location"]
-    else
-      raise Otomo::BadResponse, resp
-    end
-  end
-
-  def format_for resp
-    content = resp.header["Content-Type"]
-
-    if content
-      content = content.split(";")[0]
+    def set_cookies from_array
+      if from_array!=nil
+        @cookies = Hash[ from_array.map{|elm| (elm.split("; ")[0].split("=",2))  }]
+      end
     end
 
-    Otomo::FormatHandlers[content].process(resp)
-  end
-
-
-  def default_port
-    case @scheme
-    when "https"
-      443
-    else
-      80
+    def get_cookies
+      if @cookies
+        @cookies.map{|k,v| "#{k}=#{v}"}.join("; ")
+      else
+        nil
+      end
     end
-  end
 
+    def get_query_path path
+      if idx = path.index("?")
+        [ path[0..idx-1],  path[idx+1..-1] ]
+      end
+
+      [path]
+    end
+
+    def query_encoded_data data, initial=nil
+      if data.empty?
+        ""
+      else
+        "?" + [ initial, URI.hash_to_www_url_encoded(data) ].compact.join("&")
+      end
+    end
+
+    def prepare_headers
+      @header.merge({
+        'Cookie' => get_cookies,
+        'Referer' => referer
+      }).reject{ |k,v| v.nil? || v.empty? }
+    end
+
+    def handle_response resp
+      case resp
+      when Net::HTTPOK
+        yield if block_given?
+
+        format_for resp
+      when Net::HTTPMovedPermanently, Net::HTTPMovedTemporarily, Net::HTTPFound
+        yield if block_given?
+        get resp.response["Location"]
+      else
+        raise Otomo::BadResponse, resp
+      end
+    end
+
+    def format_for resp
+      return resp if raw_mode?
+      content = resp.header["Content-Type"]
+
+      if content
+        content = content.split(";")[0]
+        Otomo::FormatHandlers[content].process(resp)
+      else
+        Otomo::FormatHandlers::default_handler.process(resp)
+      end
+    end
   end
 end
