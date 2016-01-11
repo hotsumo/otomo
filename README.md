@@ -9,7 +9,7 @@ This gem is useful if:
 
 For example, Otomo manage cookie and session, handle xml/html using `nokogiri` and `json`
 
-Actually, I wasn't very happy with what I tried. Net/http is a bit too low level to make things clear easily when you use session, and some HTTP robots was way to specialized/high-level for me. 
+Actually, I wasn't very happy with other gems I tried. Net/http is a bit too low level to make things clear easily when you use sessions, and some HTTP robots was way too specialized/high-level for me.
 
 Here comes the man in the middle !
 
@@ -48,13 +48,54 @@ Starting a browsing party !
   end
 ```
 
-## Advantages over Net/http
+## Advantages over net/http
 
-- Manage sessions and cookie
-- Manage redirections
-- Raise Otomo::BadResponse if error
-- Cool DSL writing
+- Transparent management of sessions and cookie
+- Transparent management of redirections
+- Raise Otomo::BadResponse if any error (not a 400 response code)
+- Cool DSL look
 - You still have a low-level access to `net/http` through `otomo.http` in the DSL.
+
+## Usage of the DSL
+
+Once in the loop, you can call:
+
+- `otomo`
+
+Access to the robot (see the source of `robot.rb` for more information)
+
+
+- `debug!`
+
+Enable debug mode of net/http, to see what's in and out !
+
+- `raw_mode!`
+
+Set the robot to raw mode. All return of `get`, `post` etc. will be a net/http response (no processing with nokogiri or Json.parse)
+
+- `get(path)`
+
+Do a get request !
+
+- `post(path, data={})`
+
+Do a post request !
+
+- `header`
+
+Access to the headers of the next HTTP request. You can set-up the headers into the `Otomo.session` call (see example)
+
+- `add_cookie`
+
+Add a cookie manually
+
+- `remove_cookie`
+
+Remove a cookie manually
+
+- `clear_cookies`
+
+Clear the session
 
 ## Development
 

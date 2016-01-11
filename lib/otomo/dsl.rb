@@ -40,8 +40,8 @@ module Otomo
       otomo.remove_cookie c.to_s
     end
 
-    def submit_form form_name
-      otomo.submit_form(form_name)
+    def clear_cookies
+      otomo.clear_cookies
     end
   end
 end
