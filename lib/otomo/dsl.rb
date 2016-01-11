@@ -8,7 +8,7 @@ module Otomo
       instance_eval(&block)
     end
 
-    def debug!
+    def debug_mode!
       otomo.http.set_debug_output($stdout)
     end
 

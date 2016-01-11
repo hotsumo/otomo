@@ -60,42 +60,32 @@ Starting a browsing party !
 
 Once in the loop, you can call:
 
-- `otomo`
-
+* `otomo`
 Access to the robot (see the source of `robot.rb` for more information)
 
-
-- `debug!`
-
+* `debug_mode!`
 Enable debug mode of net/http, to see what's in and out !
 
 - `raw_mode!`
-
 Set the robot to raw mode. All return of `get`, `post` etc. will be a net/http response (no processing with nokogiri or Json.parse)
 
-- `get(path)`
+* `get|post|put|delete(path, data={})`
+Do a *insert method here* request !
 
-Do a get request !
+* request(method, path, data={})
+Do the wanted method.
 
-- `post(path, data={})`
-
-Do a post request !
-
-- `header`
-
+* `header`
 Access to the headers of the next HTTP request. You can set-up the headers into the `Otomo.session` call (see example)
 
-- `add_cookie`
-
+* `add_cookie(name, value)`
 Add a cookie manually
 
-- `remove_cookie`
-
+* `remove_cookie(name)`
 Remove a cookie manually
 
 - `clear_cookies`
-
-Clear the session
+Clear all the cookies.
 
 ## Handling the MIME types
 
@@ -132,7 +122,6 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/hotsumo/otomo. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
 
 ## License
 
