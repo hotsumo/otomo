@@ -89,8 +89,6 @@ module Otomo
 
       resp = http.post(File.join("/", path), data, prepare_headers)
 
-      File.write("tmp.html", resp.body)
-
       handle_response resp do
         set_cookies resp.get_fields('set-cookie')
         @referer = full_path(path)
