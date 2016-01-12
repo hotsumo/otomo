@@ -16,7 +16,10 @@ module Otomo
 
   def self.session path, opts={}, &block
     robot = Otomo::Robot.new path, opts
-    Otomo::DSL.new(robot, &block)
+    dsl = Otomo::DSL.new(robot, &block)
+
+    # Return the DSL return value.
+    dsl.result
   end
 
   def self.url_encode name, obj

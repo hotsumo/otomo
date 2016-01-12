@@ -1,14 +1,15 @@
 module Otomo
   class DSL
     attr_accessor :otomo
+    attr_reader :result
 
     def initialize otomo, &block
       @otomo = otomo
       otomo.connect
       if block.parameters.count==0
-        instance_eval(&block)
+        @result = instance_eval(&block)
       elsif block.parameters.count==1
-        block.call(self)
+        @result = block.call(self)
       else
         raise ArgumentError, "The block should have zero or one parameter"
       end
