@@ -6,12 +6,12 @@ require 'otomo/version'
 Gem::Specification.new do |spec|
   spec.name          = "otomo"
   spec.version       = Otomo::VERSION
-  spec.authors       = ["TODO: Write your name"]
-  spec.email         = ["yacine@kosmogo.fr"]
+  spec.authors       = ["Yacine Petitprez"]
+  spec.email         = ["yacine@hotsumo.co"]
 
-  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{Small HTTP robot with session management}
+  spec.description   = %q{Otomo is a small http robot which allow session, cookie and http/https compatibility natively.}
+  spec.homepage      = "https://github.com/hotsumo/otomo"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
