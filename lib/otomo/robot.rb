@@ -113,6 +113,8 @@ private
     def set_cookies from_array
       if from_array!=nil
         @cookies = Hash[ from_array.map{|elm| (elm.split("; ")[0].split("=",2))  }]
+      else
+        @cookies = nil
       end
     end
 
