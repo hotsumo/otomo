@@ -125,6 +125,11 @@ private
     end
 
     def get_query_path path
+
+      if path =~ /^http(s)?:\/\//
+        path.gsub!(/http(s)?:\/\/[^\/]+/, "")
+      end
+
       if idx = path.index("?")
         [ path[0..idx-1],  path[idx+1..-1] ]
       end
