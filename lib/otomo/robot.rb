@@ -132,9 +132,9 @@ private
 
       if idx = path.index("?")
         [ path[0..idx-1],  path[idx+1..-1] ]
+      else
+        [path]
       end
-
-      [path]
     end
 
     def query_encoded_data data, initial=nil
