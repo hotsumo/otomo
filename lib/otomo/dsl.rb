@@ -15,6 +15,10 @@ module Otomo
       end
     end
 
+    def set_interface x
+      otomo.http.local_host = x
+    end
+
     def debug_mode!
       otomo.http.set_debug_output($stdout)
     end
