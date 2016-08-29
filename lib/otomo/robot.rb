@@ -153,7 +153,7 @@ private
 
     def handle_response resp, opts={}
 
-      if (opts[:allow_codes]||[]).map(&:to_s).includes?(resp.code)
+      if (opts[:allow_codes]||[]).map(&:to_s).include?(resp.code)
         yield if block_given?
         format_for resp
       else
