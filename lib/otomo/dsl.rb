@@ -27,8 +27,8 @@ module Otomo
       otomo.raw_mode = true
     end
 
-    def get page, opts={}
-      otomo.get(page, opts)
+    def get page, data={}, opts={}
+      otomo.get(page, data, opts)
     end
 
     def post page, data={}, opts={}
