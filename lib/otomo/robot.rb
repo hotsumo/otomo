@@ -54,42 +54,41 @@ module Otomo
       Nokogiri::HTML(string)
     end
 
-    def put path, data={}
-      request "PUT", path, data
+    def put path, data={}, opts={}
+      request "PUT", path, data, opts
     end
 
-    def patch path, data={}
-      request "PATCH", path, data
+    def patch path, data={}, opts={}
+      request "PATCH", path, data, opts
     end
 
-    def get path, data={}
+    def get path, data={}, opts={}
       path, query = get_query_path path
-      request "GET", path + query_encoded_data(data, query),nil
+      request "GET", path + query_encoded_data(data, query),nil, opts
     end
 
-    def delete path, data={}
+    def delete path, data={}, opts={}
       path, query = get_query_path path
-      request "PATH", path + query_encoded_data(data, query), nil
+      request "DELETE", path + query_encoded_data(data, query), nil, opts
     end
 
-    def request method, path, data={}
+    def request method, path, data={}, opts={}
       resp = http.send_request(method, path, data, prepare_headers)
 
-      handle_response resp do
+      handle_response resp, opts do
         set_cookies resp.get_fields('set-cookie')
         @referer = full_path(path)
       end
     end
 
-
-    def post path, data={}
+    def post path, data={}, opts={}
       if data.is_a?(Hash)
         data = Otomo.hash_to_www_url_encoded(data)
       end
 
       resp = http.post(File.join("/", path), data, prepare_headers)
 
-      handle_response resp do
+      handle_response resp, opts do
         set_cookies resp.get_fields('set-cookie')
         @referer = full_path(path)
       end
@@ -152,18 +151,25 @@ private
       }).reject{ |k,v| v.nil? || v.empty? }
     end
 
-    def handle_response resp
-      case resp
-      when Net::HTTPOK
-        yield if block_given?
+    def handle_response resp, opts={}
 
-        format_for resp
-      when Net::HTTPMovedPermanently, Net::HTTPMovedTemporarily, Net::HTTPFound
+      if (opts[:allow_codes]||[]).map(&:to_s).includes?(resp.code)
         yield if block_given?
-        get resp.response["Location"]
+        format_for resp
       else
-        raise Otomo::BadResponse, resp
+        case resp
+        when Net::HTTPOK
+          yield if block_given?
+          format_for resp
+        when Net::HTTPMovedPermanently, Net::HTTPMovedTemporarily, Net::HTTPFound
+          yield if block_given?
+          get resp.response["Location"]
+        else
+          raise Otomo::BadResponse, resp
+        end
       end
+
+
     end
 
     def format_for resp

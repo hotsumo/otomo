@@ -27,12 +27,12 @@ module Otomo
       otomo.raw_mode = true
     end
 
-    def get page
-      otomo.get(page)
+    def get page, opts={}
+      otomo.get(page, opts)
     end
 
-    def post page, data={}
-      otomo.post(page, data)
+    def post page, data={}, opts={}
+      otomo.post(page, data, opts)
     end
 
     def header
