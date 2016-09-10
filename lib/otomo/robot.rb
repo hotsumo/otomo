@@ -73,7 +73,7 @@ module Otomo
     end
 
     def request method, path, data={}, opts={}
-      resp = http.send_request(method, path, data, prepare_headers)
+      resp = http.send_request(method, path, data, prepare_headers.merge(opts[:headers]))
 
       handle_response resp, opts do
         set_cookies resp.get_fields('set-cookie')
@@ -83,10 +83,14 @@ module Otomo
 
     def post path, data={}, opts={}
       if data.is_a?(Hash)
-        data = Otomo.hash_to_www_url_encoded(data)
+        if opts[:json]
+          data = data.to_json
+        else
+          data = Otomo.hash_to_www_url_encoded(data)
+        end
       end
 
-      resp = http.post(File.join("/", path), data, prepare_headers)
+      resp = http.post(File.join("/", path), data, prepare_headers.merge(opts[:headers]) )
 
       handle_response resp, opts do
         set_cookies resp.get_fields('set-cookie')
