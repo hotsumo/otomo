@@ -73,7 +73,7 @@ module Otomo
     end
 
     def request method, path, data={}, opts={}
-      resp = http.send_request(method, path, data, prepare_headers.merge(opts[:headers]))
+      resp = http.send_request(method, path, data, prepare_headers.merge(opts[:headers]||{}))
 
       handle_response resp, opts do
         set_cookies resp.get_fields('set-cookie')
@@ -90,7 +90,7 @@ module Otomo
         end
       end
 
-      resp = http.post(File.join("/", path), data, prepare_headers.merge(opts[:headers]) )
+      resp = http.post(File.join("/", path), data, prepare_headers.merge(opts[:headers]||{}) )
 
       handle_response resp, opts do
         set_cookies resp.get_fields('set-cookie')
