@@ -32,4 +32,36 @@ describe Otomo do
     end
   end
 
+  it "can connect through a socks proxy" do
+    require 'timeout'
+
+    pid = Process.spawn("ssh -N -D 8888 -i proxy.key root@104.199.215.92 1>/dev/null")
+    #Process.detach(pid)
+
+    begin
+      puts "pid = #{pid}"
+      sleep 5
+
+      Otomo.session "http://bot.whatismyipaddress.com",
+        proxy: { type: :socks, host: 'localhost', port: '8888' } do |otomo|
+        otomo.raw_mode!
+        x = otomo.get "/"
+        expect(x.body).to eq("104.155.228.61")
+      end
+    ensure
+      puts "KILL PROCESS!"
+      # Fuck children processes ! ~.~
+      `kill $(pgrep -P #{pid})`
+      Process.kill( 15, pid)
+      next_signal = 2
+      begin
+        Timeout::timeout(3) { Process.wait(pid) }
+      rescue
+        Process.kill(next_signal, pid)
+        next_signal = 9 if next_signal==2
+        retry
+      end
+    end
+  end
+
 end

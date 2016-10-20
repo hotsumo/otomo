@@ -8,6 +8,8 @@ module Otomo
 
     attr_accessor :cookies, :referer
 
+    attr_accessor :proxy
+
     attr_reader :http
 
     def raw_mode=raw_mode; @raw_mode=raw_mode; end
@@ -15,8 +17,12 @@ module Otomo
 
     attr_accessor :header
 
-    def initialize path, header={}
-      @header = header
+    def initialize path, opts={}
+      @net_http_class = Net::HTTP
+
+      @header = opts[:headers]||{}
+      @proxy = opts[:proxy]
+
       @raw_mode = false
 
       if path.is_a?(String)
@@ -25,6 +31,20 @@ module Otomo
         @host = uri.host
         @port = uri.port
       end
+    end
+
+    def create_net_http
+      if @proxy
+        if @proxy[:type] && @proxy[:type].to_sym==:socks
+          require 'socksify/http'
+          Net::HTTP.SOCKSProxy(@proxy[:host], @proxy[:port]).new(@host, port)
+        else
+          Net::HTTP.new(@host, port, @proxy[:host], @proxy[:port])
+        end
+      else
+        Net::HTTP.new(@host, port)
+      end
+
     end
 
     def use_ssl= x; @use_ssl = x; end
@@ -38,7 +58,7 @@ module Otomo
     end
 
     def connect
-      @http = Net::HTTP.new(@host, port)
+      @http = create_net_http
       @http.use_ssl = (@scheme == "https")
     end
 
