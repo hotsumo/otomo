@@ -187,7 +187,17 @@ private
           format_for resp
         when Net::HTTPMovedPermanently, Net::HTTPMovedTemporarily, Net::HTTPFound
           yield if block_given?
-          get resp.response["Location"]
+
+         opts[:redirects] ||= 5
+            opts[:redirects] -= 1
+
+            if opts[:redirects] <= 0
+              raise Otomo::BadResponse, "Too many redirect"
+            end
+
+          @http.use_ssl = (resp.response["Location"] =~ /^https\:/)
+
+          get resp.response["Location"], {}, opts
         else
           raise Otomo::BadResponse, resp
         end
